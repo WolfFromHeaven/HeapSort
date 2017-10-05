@@ -45,6 +45,7 @@ void Master::run()
   double rTime = 0;
   double avgTime;
   double maxTime;
+	double totTime = 0;
 
 
 	// RECIEVING TOPK DATASET RANGE
@@ -117,6 +118,7 @@ void Master::run()
   cout << rank << ": MAP     | Avg = " << setw(10) << avgTime/numWorker
        << "   Max = " << setw(10) << maxTime << endl;
 	//cout<<"MAP phase successful"<<"\n";
+	totTime += avgTime/numWorker;
 
   // COMPUTE PACKING TIME
   MPI::COMM_WORLD.Gather( &rTime, 1, MPI::DOUBLE, rcvTime, 1, MPI::DOUBLE, 0 );
@@ -129,6 +131,7 @@ void Master::run()
   cout << rank << ": PACK    | Avg = " << setw(10) << avgTime/numWorker
        << "   Max = " << setw(10) << maxTime << endl;  
 	//cout<<"PACKING successful"<<"\n";
+	//totTime += avgTime/numWorker;
 
   
   // COMPUTE SHUFFLE TIME
@@ -145,7 +148,7 @@ void Master::run()
   cout << rank << ": SHUFFLE | Sum = " << setw(10) << avgTime
        << "   Rate = " << setw(10) << avgRate/numWorker << " Mbps" << endl;
 	//cout<<"SHUFFLE phase successful"<<"\n";  
-
+	totTime += avgTime/numWorker;
 
   // COMPUTE UNPACK TIME
   MPI::COMM_WORLD.Gather( &rTime, 1, MPI::DOUBLE, rcvTime, 1, MPI::DOUBLE, 0 );
@@ -158,7 +161,7 @@ void Master::run()
   cout << rank << ": UNPACK  | Avg = " << setw(10) << avgTime/numWorker
        << "   Max = " << setw(10) << maxTime << endl;
   //cout<<"UNPACKING successful"<<"\n";
-  
+  //totTime += avgTime/numWorker;
   
   // COMPUTE REDUCE TIME
   MPI::COMM_WORLD.Gather( &rTime, 1, MPI::DOUBLE, rcvTime, 1, MPI::DOUBLE, 0 );
@@ -172,6 +175,8 @@ void Master::run()
   cout << rank << ": REDUCE  | Avg = " << setw(10) << avgTime/numWorker
        << "   Max = " << setw(10) << maxTime << endl;      
   //cout<<"REDUCE phase successful"<<"\n";
+	totTime += avgTime/numWorker;
+	cout<< rank << ": TOTAL = " << totTime<< endl;
 
   // CLEAN UP MEMORY
   for ( auto it = partitionList.begin(); it != partitionList.end(); it++ ) {
