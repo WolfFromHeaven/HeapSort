@@ -85,7 +85,7 @@ void Master::run()
 	}
 	//cout<<part[0]<<" "<<part[1];
 	unsigned char tempArr[conf.getKeySize()];
-	for( unsigned int i = 0; i < 2; i++){
+	for( unsigned int i = 0; i < conf.getNumReducer()-1; i++){
 		unsigned long long num = part[i];cout<<i<<"\n";
 		unsigned char* keyBuff = new unsigned char[ conf.getKeySize()];
 		for(unsigned int j = 0; j < conf.getKeySize(); j++){
