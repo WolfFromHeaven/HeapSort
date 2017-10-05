@@ -183,30 +183,34 @@ void Worker::execMap()
 	
 	//STORING INPUT DATA
 	//unsigned char key[conf->getKeySize() + 1];
-  LineList keyValueArray;
+  
+
+	LineList keyValueArray;
 	for(unsigned int i = 0; i < numLine; i++){
 		unsigned char* buff = new unsigned char[ lineSize ];    
 		inputFile.read( ( char * ) buff, lineSize );            
     keyValueArray.push_back( buff );
 	} 
-	cout<<keyValueArray.size()<<"\n";
-  inputFile.close();  
-
+	//cout<<keyValueArray.size()<<"\n";
+  inputFile.close();
+	
 	//SORTING THE KEYS
 	//sort( keyValueArray.begin(), keyValueArray.end(), Sorter(conf->getKeySize()) );
 	
 	unsigned int K = conf->getK();
-	cout<<rank<<" : ";
-	clock_t t3 = 0;
-	t3 = clock();
-	partial_sort(keyValueArray.begin(), next(keyValueArray.begin(),K), keyValueArray.end(), Sorter(conf->getKeySize()));
+	//partial_sort(keyValueArray.begin(), next(keyValueArray.begin(),K), keyValueArray.end(), Sorter(conf->getKeySize()));
+	sort( keyValueArray.begin(), keyValueArray.end(), Sorter(conf->getKeySize()) );	
+
 	LineList top_K;
+
+
 	for(auto it = keyValueArray.begin(); it != next(keyValueArray.begin(),K); ++it){
 		top_K.push_back(*it);
 	}
+
 	//LineList top_K = FindtopK(keyValueArray,K); 
-	t3 = clock() - t3;
-	cout<<"TopK extraction time : "<<((float)t3)/CLOCKS_PER_SEC<<"\n";
+	//cout<<"Partial Sorting time : "<<((float)t3)/CLOCKS_PER_SEC<<"\n";
+	//cout<<rank<<" : TopK extraction time : "<<((float)T1)/CLOCKS_PER_SEC<<"\n";
 
 /*	cout<<rank << ": ";
 	for(unsigned int i = 0; i < K; i++){
@@ -222,7 +226,7 @@ void Worker::execMap()
 	LineList minMax;
 	minMax.push_back(top_K.front());
 	minMax.push_back(top_K.back());
-
+	
 	for(auto it = minMax.begin(); it != minMax.end(); ++it){
 			unsigned char* partition = *it;
 			//MPI::COMM_WORLD.Gather( partition, conf->getKeySize(), MPI::UNSIGNED_CHAR, NULL, 0, MPI::UNSIGNED_CHAR, 0 );
@@ -230,7 +234,7 @@ void Worker::execMap()
 
 	}
    
-
+	
 	// RECEIVE PARTITIONS FROM MASTER
   for ( unsigned int i = 1; i < conf->getNumReducer(); i++ ) {
     unsigned char* buff = new unsigned char[ conf->getKeySize() + 1 ];
@@ -238,6 +242,11 @@ void Worker::execMap()
     partitionList.push_back( buff );//cout<<buff<<"\n";
   }
 
+	//T = clock() - T;
+	//cout<<rank<<" : TopK partition time : "<<((float)T)/CLOCKS_PER_SEC<<"\n";
+
+	//clock_t T2 = 0; 
+	//T2 = clock();
   // Build trie
   unsigned char prefix[ conf->getKeySize() ];
   trie = buildTrie( &partitionList, 0, partitionList.size(), prefix, 0, 2 );
@@ -246,7 +255,6 @@ void Worker::execMap()
   for ( unsigned int i = 0; i < conf->getNumReducer(); i++ ) {
     partitionCollection.insert( pair< unsigned int, LineList* >( i, new LineList ) );
   }
-
 
 	//PARTITIONING LOCAL DATA
 	//cout<<rank<<":";
@@ -262,6 +270,8 @@ void Worker::execMap()
 		cout<<numLine<<" ";
   }
 	cout<<"\n";*/
+	//T2 = clock() - T2;
+	//cout<<rank<<" : Hashing Time : " <<((float)T2)/CLOCKS_PER_SEC<<"\n";
 
   time += clock();
   rTime = double( time ) / CLOCKS_PER_SEC;  
@@ -539,7 +549,6 @@ LineList Worker::FindtopK(LineList array, unsigned int k){
 	//cout<<"Time taken to readjust heap after inserting an element : "<<totalpush<<"\n";
 	return finaltopK;
 }
-
 
 
 
